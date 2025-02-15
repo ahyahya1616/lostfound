@@ -1,0 +1,6 @@
+{# templates/_messages_badge.html.twig #}
+{% if unread_count > 0 %}
+   <span class="ml-2 bg-red-500 text-white rounded-full px-2 py-1 text-xs">
+            {{ unread_count }}
+        </span>
+{% endif %}

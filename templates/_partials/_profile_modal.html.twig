@@ -1,0 +1,110 @@
+  <!-- Modal -->
+<div id="profileModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-96 relative">
+        <!-- Bouton Fermer -->
+        <button onclick="closeProfileModal()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700">
+            ✖
+        </button>
+
+        <!-- Profil -->
+        <div class="text-center">
+            <div id="authProviderIcon" class="text-3xl mb-2"></div>
+            <h2 class="text-xl font-semibold text-gray-800" id="userFullName"></h2>
+            <p class="text-gray-500" id="userEmail"></p>
+            <p class="text-sm text-gray-400" id="userCreatedAt"></p>
+        </div>
+
+        <!-- Modifier mot de passe si Email -->
+        <div id="changePasswordSection" class="mt-4 hidden">
+            <h3 class="text-sm font-semibold text-gray-700">Modifier le mot de passe</h3>
+            <input type="password" id="newPassword" class="w-full p-2 border rounded mt-2" placeholder="Nouveau mot de passe">
+            <button onclick="updatePassword()" class="bg-blue-500 text-white px-4 py-2 mt-2 rounded">Enregistrer</button>
+        </div>
+    </div>
+</div>
+<script>
+{% if app.user %}
+function openProfileModal() {
+    const user = {
+        fullName: "{{ app.user.fullName }}",
+        email: "{{ app.user.email }}",
+        createdAt: "{{ app.user.createdAt|date('d/m/Y') }}",
+        authProvider: "{{ app.user.authProvider }}"
+    };
+
+    // Mettre à jour les infos dans le modal
+    document.getElementById("userFullName").innerText = user.fullName;
+    document.getElementById("userEmail").innerText = user.email;
+    document.getElementById("userCreatedAt").innerText = "Inscrit le " + user.createdAt;
+
+    // Gérer l'affichage de l'icône d'authentification
+    const authIcon = document.getElementById("authProviderIcon");
+    const changePasswordSection = document.getElementById("changePasswordSection");
+    
+    switch(user.authProvider) {
+        case 'google':
+            authIcon.innerHTML = '<i class="fab fa-google text-blue-500"></i>';
+            changePasswordSection.classList.add("hidden");
+            break;
+        case 'facebook':
+            authIcon.innerHTML = '<i class="fab fa-facebook text-blue-600"></i>';
+            changePasswordSection.classList.add("hidden");
+            break;
+        default:
+            authIcon.innerHTML = '<i class="fas fa-envelope text-gray-600"></i>';
+            changePasswordSection.classList.remove("hidden");
+    }
+
+    // Afficher le modal
+    document.getElementById("profileModal").classList.remove("hidden");
+}
+{% else %}
+function openProfileModal() {
+    window.location.href = "{{ path('app_login') }}";
+}
+{% endif %}
+
+function closeProfileModal() {
+    document.getElementById("profileModal").classList.add("hidden");
+    // Réinitialiser le formulaire
+    document.getElementById("newPassword").value = "";
+    document.getElementById("passwordError")?.remove();
+}
+
+async function updatePassword() {
+    const passwordInput = document.getElementById("newPassword");
+    const newPassword = passwordInput.value;
+    
+    // Supprimer les messages d'erreur précédents
+    const existingError = document.getElementById("passwordError");
+    if (existingError) existingError.remove();
+
+    try {
+        const response = await fetch('/api/profile/update-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ newPassword })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.errors ? data.errors.join(', ') : data.error);
+        }
+
+        // Succès
+        alert(data.message);
+        closeProfileModal();
+    } catch (error) {
+        // Afficher l'erreur sous le champ de mot de passe
+        const errorDiv = document.createElement('div');
+        errorDiv.id = 'passwordError';
+        errorDiv.className = 'text-red-500 text-sm mt-1';
+        errorDiv.textContent = error.message;
+        passwordInput.parentNode.insertBefore(errorDiv, passwordInput.nextSibling);
+    }
+}
+</script>

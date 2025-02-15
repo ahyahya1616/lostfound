@@ -1,0 +1,185 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Bienvenue sur TrouveTonObjet{% endblock %}
+
+{% block body %}
+<div class="min-h-screen">
+    <!-- Hero Section -->
+    <div class="relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-teal-800/80 z-10"></div>
+        <div class="h-[600px] bg-[url('/uploads/images/lost-items.jpg')] bg-cover bg-center"></div>
+        
+        <div class="absolute inset-0 flex items-center justify-center z-20">
+            <div class="text-center space-y-6 px-4">
+                <h1 class="text-5xl md:text-6xl font-bold text-white mb-4 animate-fade-in">
+                    Retrouvez vos objets perdus
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto">
+                    Une communauté bienveillante pour vous aider à retrouver ce qui compte pour vous
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+                    {% if not app.user %}
+                        <button onclick="openLoginModal()" class="inline-flex items-center px-6 py-3 rounded-full bg-white text-gray-900 hover:bg-gray-100 transform hover:scale-105 transition">
+                            <i class="fas fa-envelope mr-2"></i>
+                            Se connecter avec Email
+                        </button>
+                        <a href="{{ path('connect_google_start') }}" class="inline-flex items-center px-6 py-3 rounded-full bg-white text-gray-900 hover:bg-gray-100 transform hover:scale-105 transition text-lg font-bold">
+                        <i class="fab fa-google mr-2 text-blue-500"></i>
+                        Continuer avec Google
+                    </a>
+                        
+                    {% endif %}
+                    <a href="#how-it-works" class="inline-flex items-center px-6 py-3 rounded-full bg-teal-600 text-white hover:bg-teal-500 transform hover:scale-105 transition">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Comment ça marche ?
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Témoignages Section -->
+<div class="py-16 bg-gray-900">
+    <div class="max-w-7xl mx-auto px-4 text-center">
+        <h2 class="text-3xl md:text-4xl font-bold text-white mb-8">
+            Ce que disent nos utilisateurs
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="p-6 rounded-lg bg-gray-800 transform hover:scale-105 transition">
+                <p class="text-gray-300 italic">"J'ai retrouvé mon sac perdu en seulement 2 jours grâce à la plateforme. Merci !!"</p>
+                <div class="mt-4 flex items-center justify-center">
+                    <img src="/uploads/profile/profile2.jpeg" class="w-12 h-12 rounded-full border-2 border-yellow-400">
+                    <span class="ml-3 text-white font-bold">Yahya A.</span>
+                </div>
+            </div>
+            <div class="p-6 rounded-lg bg-gray-800 transform hover:scale-105 transition">
+                <p class="text-gray-300 italic">"Service incroyable ! J’ai pu rendre un portefeuille trouvé à son propriétaire en toute simplicité."</p>
+                <div class="mt-4 flex items-center justify-center">
+                    <img src="/uploads/profile/user2.jpeg" class="w-12 h-12 rounded-full border-2 border-teal-400">
+                    <span class="ml-3 text-white font-bold">Karim D.</span>
+                </div>
+            </div>
+            <div class="p-6 rounded-lg bg-gray-800 transform hover:scale-105 transition">
+                <p class="text-gray-300 italic">"Une super initiative ! La solidarité entre les membres est incroyable."</p>
+                <div class="mt-4 flex items-center justify-center">
+                    <img src="/uploads/profile/user33.jpg" class="w-12 h-12 rounded-full border-2 border-blue-400">
+                    <span class="ml-3 text-white font-bold">Emma T.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- How it works Section -->
+    <div id="how-it-works" class="py-16 bg-gray-800">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center text-white mb-12">
+                Comment retrouver vos objets ?
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center p-6">
+                    <div class="w-16 h-16 bg-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-upload text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">1. Signalez votre objet</h3>
+                    <p class="text-gray-300">Décrivez l'objet perdu et ajoutez des photos pour faciliter son identification</p>
+                </div>
+                <div class="text-center p-6">
+                    <div class="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-search text-2xl text-gray-900"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">2. La communauté cherche</h3>
+                    <p class="text-gray-300">Notre communauté est alertée et vous aide à retrouver votre objet</p>
+                </div>
+                <div class="text-center p-6">
+                    <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-handshake text-2xl text-white"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-2">3. Récupérez votre bien</h3>
+                    <p class="text-gray-300">Organisez la récupération de votre objet en toute sécurité</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <!-- CTA Section -->
+    <div class="py-16 bg-gradient-to-r from-blue-900 to-teal-800">
+        <div class="max-w-4xl mx-auto text-center px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
+                Prêt à retrouver vos objets perdus ?
+            </h2>
+            <p class="text-xl text-gray-200 mb-8">
+                Rejoignez notre communauté et bénéficiez de l'aide de milliers de personnes
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                {% if not app.user %}
+                    <a href="{{ path('app_register') }}" class="inline-flex items-center px-8 py-4 rounded-full bg-yellow-400 text-gray-900 hover:bg-yellow-300 transform hover:scale-105 transition text-lg font-bold">
+                        <i class="fas fa-user-plus mr-2"></i>
+                        Créer un compte gratuitement
+                    </a>
+                    
+                {% else %}
+                    <a href="{{ path('app_dashboard') }}" class="inline-flex items-center px-8 py-4 rounded-full bg-yellow-400 text-gray-900 hover:bg-yellow-300 transform hover:scale-105 transition text-lg font-bold">
+                        <i class="fas fa-search mr-2"></i>
+                        Accéder à mon espace
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de connexion -->
+<div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-md mx-4">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold text-gray-900">Connexion</h3>
+            <button onclick="closeLoginModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        {% if error %}
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                {{ error.messageKey|trans(error.messageData, 'security') }}
+            </div>
+        {% endif %}
+
+        <form action="{{ path('app_login') }}" method="post" class="space-y-6">
+            <div>
+                <label for="inputEmail" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <input type="email" value="{{ last_username }}" name="email" id="inputEmail" 
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                    required autofocus>
+            </div>
+
+            <div>
+                <label for="inputPassword" class="block text-sm font-medium text-gray-700 mb-2">Mot de passe</label>
+                <input type="password" name="password" id="inputPassword" 
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                    required>
+            </div>
+
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+            <div class="flex items-center">
+                <input type="checkbox" name="_remember_me" id="remember_me" class="h-4 w-4 text-blue-600">
+                <label for="remember_me" class="ml-2 block text-sm text-gray-700">Se souvenir de moi</label>
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
+                Se connecter
+            </button>
+        </form>
+
+        <div class="mt-6 text-center">
+            <p class="text-sm text-gray-600">Pas encore de compte ?</p>
+            <a href="{{ path('app_register') }}" class="text-blue-600 hover:text-blue-800 font-medium">
+                Créer un compte
+            </a>
+        </div>
+    </div>
+</div>
+<script src="{{ asset('js/login.js') }}"></script>
+    
+{% endblock %}

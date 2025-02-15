@@ -1,0 +1,323 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Objets Perdus et Trouvés{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+          .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+
+        .post-meta {
+            flex-grow: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #1c1e21;
+            margin-bottom: 2px;
+        }
+
+        .post-time {
+            font-size: 0.8rem;
+            color: #65676b;
+        }
+
+        .post-content {
+            padding: 16px;
+        }
+
+       
+
+        .image-grid {
+            display: grid;
+            gap: 2px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .image-grid-1 { grid-template-columns: 1fr; }
+        .image-grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .image-grid-3 { grid-template-columns: repeat(2, 1fr); }
+        .image-grid-4 { grid-template-columns: repeat(2, 1fr); }
+
+        .image-grid img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .image-grid-3 img:first-child {
+            grid-column: 1 / -1;
+        }
+
+        .image-grid-4 img:first-child {
+            grid-column: 1 / -1;
+        }
+
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-lost {
+            background-color: #ffebe9;
+            color: #cf222e;
+        }
+
+        .status-found {
+            background-color: #dafbe1;
+            color: #1a7f37;
+        }
+
+        .location-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            background-color: #f0f2f5;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: #65676b;
+            margin-top: 8px;
+        }
+
+       
+
+        #search, #category, #location, #type {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .sidebar-filters {
+            background: #ffffff;
+            width: 320px;
+            padding: 1.25rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+            margin-right: 2rem;
+        }
+
+        .filters-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .filters-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+
+        .filters-subtitle {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .filter-group {
+            margin-bottom: 1.25rem;
+            position: relative;
+        }
+
+        .filter-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .filter-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            padding-left: 2.5rem;
+            background-color: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            color: #1e293b;
+            transition: all 0.2s ease;
+        }
+
+        .filter-input:hover {
+            background-color: #f1f5f9;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: #38bdf8;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1);
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background-color: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            color: #1e293b;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .filter-select:hover {
+            background-color: #f1f5f9;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #38bdf8;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1);
+        }
+
+        .filter-icon {
+            position: absolute;
+            left: 1rem;
+            top: 2.5rem;
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #e2e8f0;
+            margin: 1.25rem 0;
+        }
+
+        .active-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .filter-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            background-color: #f1f5f9;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: #475569;
+            gap: 0.5rem;
+        }
+
+        .filter-tag i {
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .filter-tag:hover {
+            background-color: #e2e8f0;
+        }
+      /* CSS de style pour la description*/
+        .post-description {
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: #1c1e21;
+        }
+
+        .animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-8">
+   
+    <!-- Barre de recherche -->
+    <div class="bg-gray-800 shadow-lg p-4 rounded-lg flex gap-6 mb-6 max-w-full mx-auto items-center">
+        <div class="flex items-center flex-1 gap-2">
+        <i class="fas fa-search text-gray-500"></i>
+        <input type="text" id="search" class="w-full px-4 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="Que recherchez-vous ?">
+    </div>
+    <div class="flex items-center flex-1 gap-2">
+        <i class="fas fa-map-marker-alt text-gray-500"></i>
+        <input type="text" id="location" class="w-full px-4 py-2 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="Saisissez un lieu">
+    </div>
+        <div class="relative flex items-center flex-1">
+            <select id="category" class="w-full py-2 px-4 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                <option value="">Toutes les catégories</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="relative flex items-center flex-1">
+            <select id="type" class="w-full py-2 px-4 border border-gray-600 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                <option value="tous">Tous les types</option>
+                <option value="perdu">Objet perdu</option>
+                <option value="trouvé">Objet trouvé</option>
+            </select>
+        </div>
+    </div>
+      <div class="max-w-3xl mx-auto">
+        <div id="search-results" style="display: none;"></div>
+        <div id="initial-content">
+            {% include 'dashboard/_objects_list.html.twig' with {'objects': objects} %}
+        </div>
+    </div>
+
+ {% include 'dashboard/add_object.html.twig' with { 'form': form } %}
+
+
+    
+</div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    
+    <script>
+        const addObjectUrl = "{{ path('app_add_object') }}";
+    </script>
+    <script src="{{ asset('js/addObject.js') }}"></script>
+    <script src="{{ asset('js/search.js') }}"></script>
+    <script src="{{ asset('js/gallery.js') }}"></script>
+     
+{% endblock %}
+    

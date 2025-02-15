@@ -1,0 +1,274 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Objets{% endblock %}
+
+{% block stylesheets %}
+<style>
+/* Style des Onglets */
+.tabs-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.tab-button {
+    padding: 12px 25px;
+    font-size: 16px;
+    background-color: transparent;
+    border: 2px solid #444;
+    color: #ddd;
+    border-radius: 12px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    margin: 0 10px;
+}
+
+.tab-button:hover, .tab-button.active {
+    color: #fff;
+    background-color: #4CBBF4;
+    border-color: #4CBBF4;
+}
+
+/* Grille des objets */
+.objects-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Cartes d'objets animées */
+.object-card {
+    width: 100%;
+    height: 400px;
+    perspective: 1000px;
+}
+
+.object-inner-card {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s ease;
+}
+
+.object-card:hover .object-inner-card {
+    transform: rotateY(180deg);
+}
+
+.object-front, .object-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    padding: 15px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.object-front {
+    background: #222;
+    color: white;
+}
+
+.object-back {
+    background: #333;
+    color: white;
+    transform: rotateY(180deg);
+}
+
+.object-image {
+    width: 100%;
+    height: 70%;
+    object-fit: cover;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+}
+
+.object-card:hover .object-image {
+    transform: scale(1.1);
+}
+
+.status.lost {
+    color: #FF6F61;
+}
+
+.status.found {
+    color: #4CAF50;
+}
+
+/* Pagination */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container mx-auto mt-10">
+    <!-- Onglets interactifs -->
+    <div class="tabs-container">
+        <button data-tab="lost" onclick="showTab('lost')" class="tab-button {{ currentTab == 'lost' ? 'active' : '' }}">Objets Perdus</button>
+        <button data-tab="found" onclick="showTab('found')" class="tab-button {{ currentTab == 'found' ? 'active' : '' }}">Objets Trouvés</button>
+    </div>
+{% if not hasObjects %}
+    <div class="text-center py-12">
+        <h2 class="text-2xl text-gray-300 mb-4">Vous n'avez encore posté aucun objet.</h2>
+        <p class="text-gray-400">Ajoutez un objet maintenant pour qu'il apparaisse ici !</p>
+    </div>
+{% elseif objects is empty %}
+    <div class="text-center py-12">
+        <h2 class="text-2xl text-gray-300 mb-4">Aucun objet trouvé dans cette catégorie.</h2>
+        <p class="text-gray-400">Essayez de changer d'onglet ou d'ajouter un nouvel objet.</p>
+    </div>
+{% else %}
+    <!-- Liste des objets -->
+    <div class="objects-list grid grid-cols-3 gap-6">
+        {% for object in objects %}
+            <article class="object-card">
+                <div class="object-inner-card">
+                    <div class="object-front">
+                        <img src="{{ asset(object.imageFiles[0].filePath) }}" alt="{{ object.title }}" class="object-image">
+                        <h2 class="object-title">{{ object.title }}</h2>
+                        <p class="object-description">{{ object.description|slice(0, 50) ~ '...' }}</p>
+                    </div>
+                    <div class="object-back">
+                        <p><strong>Publié le :</strong> {{ object.createdAt|date('d M Y à H:i') }}</p>
+                        <p><strong>Status :</strong>
+                            <span class="status {{ object.status.value == 'perdu' ? 'lost' : 'found' }}">
+                                {{ object.status.value == 'perdu' ? 'Perdu' : 'Trouvé' }}
+                            </span>
+                        </p>
+                        <p><strong>Localisation :</strong> {{ object.location }}</p>
+                         <button class="action-button flex items-center gap-2 text-red-400 hover:bg-red-800 hover:text-white transition px-4 py-2 rounded" 
+                                onclick="deleteObject('{{ path('app_delete_object', {'id': object.id}) }}')">
+                            Supprimer
+                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
+                        <button class="action-button flex items-center gap-2 text-blue-500 hover:bg-blue-800 hover:text-white transition px-4 py-2 rounded"
+                             onclick="openEditModal('{{ object.id }}', '{{ object.title }}', '{{ object.description }}', '{{ object.location }}', '{{ object.latitude }}', '{{ object.longitude }}', '{{ object.category.id }}')">
+                           Modifier
+                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                     d="M11 17l-1.5 1.5a2 2 0 01-2.828 0L3 15.828a2 2 0 010-2.828L10 6l4 4m2 2l4 4m-6 6H5m14-14l-4-4"/>
+                             </svg> 
+                        </button>
+
+                        
+                        </div>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+     {% if hasMore %}
+        <div class="pagination-container flex justify-center mt-8">
+            <button onclick="loadMoreObjects()" class="load-more-btn px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition">
+                Charger Plus d'Objets
+            </button>
+        </div>
+    {% endif %}
+{% endif %}
+<div id="editObjectModal" class="fixed inset-0 z-50 hidden flex justify-center items-center p-4 bg-black/50 backdrop-blur-sm transition-opacity duration-300">
+    <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-300">
+        
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-yellow-500 to-orange-600 text-white p-6 rounded-t-2xl flex justify-between items-center">
+            <h2 class="text-2xl font-bold">Modifier l'Objet</h2>
+            <button onclick="closeEditModal()" class="text-white hover:bg-white/20 rounded-full p-2 transition-all duration-300">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Form -->
+        <form id="editObjectForm" class="p-6 space-y-6" method="POST">
+            <input type="hidden" id="editObjectId" name="id">
+
+            <!-- Nom -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Nom de l'objet</label>
+                <input type="text" id="editTitle" name="title" 
+                    class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm py-2 px-3 text-black focus:ring-yellow-500 focus:border-yellow-500 transition">
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea id="editDescription" name="description" 
+                    class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm py-2 px-3 text-black h-24 focus:ring-yellow-500 focus:border-yellow-500 transition"></textarea>
+            </div>
+
+            <!-- Lieu -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Lieu</label>
+                <input type="text" id="editLocation" name="location" 
+                    class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm py-2 px-3 text-black focus:ring-yellow-500 focus:border-yellow-500 transition">
+            </div>
+
+            <!-- Latitude & Longitude -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Latitude</label>
+                    <input type="text" id="editLatitude" name="latitude" 
+                        class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm py-2 px-3 text-black focus:ring-yellow-500 focus:border-yellow-500 transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Longitude</label>
+                    <input type="text" id="editLongitude" name="longitude" 
+                        class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm py-2 px-3 text-black focus:ring-yellow-500 focus:border-yellow-500 transition">
+                </div>
+            </div>
+
+            <!-- Catégorie -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Catégorie</label>
+                <select id="editCategory" name="category" 
+                    class="mt-1 block w-full border-gray-300 rounded-lg shadow-sm py-2 px-3 text-black focus:ring-yellow-500 focus:border-yellow-500 transition">
+                    {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Boutons -->
+            <div class="flex justify-end space-x-4 mt-6 p-6 bg-gray-100 rounded-b-2xl">
+                <button type="button" onclick="closeEditModal()" 
+                    class="px-5 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-all duration-300">
+                    Annuler
+                </button>
+                <button type="submit" 
+                    class="px-5 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 shadow-md transition-all duration-300">
+                    Modifier
+                </button>
+            </div>
+        </form>
+    </div>
+    
+</div>
+</div>
+
+
+ {% include 'dashboard/add_object.html.twig' with { 'form': form } %}
+
+{% endblock %}
+
+{% block javascripts %}
+<script src="{{ asset('js/base.js') }}"></script>
+<script src="{{ asset('js/editObject.js') }}"></script>
+<script src="{{ asset('js/addObject.js') }}"></script>
+<script src="{{ asset('js/myObjects.js') }}"></script>
+<script src="{{ asset('js/deleteObject.js') }}"></script>
+{% endblock %}
+
